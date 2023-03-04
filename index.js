@@ -9,6 +9,43 @@ const prisma = new PrismaClient()
 
 const url = "https://diablodex.com/Database/Items";
 
+const item_types = [
+    'Amazon Weapons',
+    'Amulets',
+    'Axes',
+    'Barbarian Helms',
+    'Belts',
+    'Body Armors',
+    'Boots',
+    'Bows',
+    'Charms',
+    'Circlets',
+    'Crossbows',
+    'Daggers',
+    'Druid Pelts',
+    'Gloves',
+    'Helms',
+    'Javelins',
+    'Jewels',
+    'Katars',
+    'Maces',
+    'Necromancer Shrunken Heads',
+    'Paladin Shields',
+    'Polearms',
+    'Rings',
+    'Scepters',
+    'Shields',
+    'Sorceress Orbs',
+    'Spears',
+    'Staffs',
+    'Swords',
+    'Throwing Weapons',
+    'Two-Handed Axes',
+    'Two-Handed Maces',
+    'Two-Handed Swords',
+    'Wands'
+]
+
 async function getItemData() {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -16,35 +53,45 @@ async function getItemData() {
     await page.goto(url);
 
     let page_content = await page.content();
-    const $ = cheerio.load(page_content);
 
-    let list = $('.guide-item-wrapper');
-    list.each(async (idx, el) => {
-        let title = $(el).find('.text-decoration-none.itemcolor-unique').text();
-        if (typeof title !== 'string' || !title.trim().length) {
-            title = $(el).find('.text-decoration-none.text-white').text();
-        }
-        if (typeof title !== 'string' || !title.trim().length) {
-            title = $(el).find('.text-decoration-none.itemcolor-set').text();
-        }
+    for (let x = 0; x < item_types.length; x++) {
+        const item_type = item_types[x];
         
-        
-        let info = $(el).find('.info-wrapper').find('div');
-        let stats = [];
-        let info_array = [];
-        let quality = null;
-        info.each((idi, el2) => {
-            if ($(el2).attr("class") === 'itemcolor-magic') {
-                stats.push($(el2).text());
-            } else if ($(el2).attr("class") === 'mb-2') {
-                quality = $(el2).text();
-            } else {
-                info_array.push($(el2).text());
+        const searchResultSelector = `#radioDbItem${x}`;
+        await page.$eval(searchResultSelector, form => form.click() );
+
+        page_content = await page.content();
+
+        const $ = cheerio.load(page_content);
+
+        let list = $('.guide-item-wrapper');
+        list.each(async (idx, el) => {
+            let title = $(el).find('.text-decoration-none.itemcolor-unique').text();
+            if (typeof title !== 'string' || !title.trim().length) {
+                title = $(el).find('.text-decoration-none.text-white').text();
             }
-        });
+            if (typeof title !== 'string' || !title.trim().length) {
+                title = $(el).find('.text-decoration-none.itemcolor-set').text();
+            }
+            
+            
+            let info = $(el).find('.info-wrapper').find('div');
+            let stats = [];
+            let info_array = [];
+            let quality = null;
+            info.each((idi, el2) => {
+                if ($(el2).attr("class") === 'itemcolor-magic') {
+                    stats.push($(el2).text());
+                } else if ($(el2).attr("class") === 'mb-2') {
+                    quality = $(el2).text();
+                } else {
+                    info_array.push($(el2).text());
+                }
+            });
 
-        await createItem(title, '', stats, '', quality, '');
-    });
+            await createItem(title, item_type, stats, '', quality, '');
+        });
+    }
   
     await browser.close();
 }
