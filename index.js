@@ -2,7 +2,8 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const pretty = require("pretty");
 const puppeteer = require('puppeteer');
-
+const fs = require('fs');
+const request = require('request');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient()
@@ -46,6 +47,20 @@ const item_types = [
     'Wands'
 ]
 
+function download(uri, filename) {
+    return new Promise((resolve, reject) => {
+        request.head(uri, function(err, res, body){
+            if (err) {
+                return reject(err);
+            }
+            console.log('content-type:', res.headers['content-type']);
+            console.log('content-length:', res.headers['content-length']);
+        
+            request(uri).pipe(fs.createWriteStream(filename)).on('close', resolve);
+        });
+    });
+  };
+
 async function getItemData() {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -73,6 +88,10 @@ async function getItemData() {
             if (typeof title !== 'string' || !title.trim().length) {
                 title = $(el).find('.text-decoration-none.itemcolor-set').text();
             }
+
+            let image = $(el).find('.guide-image-wrapper').find('img').attr('src');
+            let image_name = image.split('/')[image.split('/').length - 1];
+            await download(image, `images/${image_name}`);
             
             
             let info = $(el).find('.info-wrapper').find('div');
