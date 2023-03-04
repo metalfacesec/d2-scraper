@@ -94,8 +94,6 @@ async function getItemData() {
                 await download(image, `images/${image_name}`);
             }
             
-            
-            
             let info = $(el).find('.info-wrapper').find('div');
             let stats = [];
             let info_array = [];
