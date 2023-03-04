@@ -20,12 +20,12 @@ async function getItemData() {
 
     let list = $('.guide-item-wrapper');
     list.each(async (idx, el) => {
-        let name = $(el).find('.text-decoration-none.itemcolor-unique').text();
-        if (typeof name !== 'string' || !name.trim().length) {
-            name = $(el).find('.text-decoration-none.text-white').text();
+        let title = $(el).find('.text-decoration-none.itemcolor-unique').text();
+        if (typeof title !== 'string' || !title.trim().length) {
+            title = $(el).find('.text-decoration-none.text-white').text();
         }
-        if (typeof name !== 'string' || !name.trim().length) {
-            name = $(el).find('.text-decoration-none.itemcolor-set').text();
+        if (typeof title !== 'string' || !title.trim().length) {
+            title = $(el).find('.text-decoration-none.itemcolor-set').text();
         }
         
         
@@ -43,16 +43,16 @@ async function getItemData() {
             }
         });
 
-        await createItem(name, '', stats, '', quality, '');
+        await createItem(title, '', stats, '', quality, '');
     });
   
     await browser.close();
 }
 
-async function createItem(name, type, stats, rarity, quality, image) {
+async function createItem(title, type, stats, rarity, quality, image) {
     await prisma.item.create({
       data: {
-        title: name,
+        title: title,
         type: type,
         staticStats: stats,
         rarity: rarity,
