@@ -80,11 +80,14 @@ async function getItemData() {
         let list = $('.guide-item-wrapper');
         list.each(async (idx, el) => {
             let title = $(el).find('.text-decoration-none.itemcolor-unique').text();
+            let rarity = 'unique';
             if (typeof title !== 'string' || !title.trim().length) {
                 title = $(el).find('.text-decoration-none.text-white').text();
+                rarity = 'normal';
             }
             if (typeof title !== 'string' || !title.trim().length) {
                 title = $(el).find('.text-decoration-none.itemcolor-set').text();
+                rarity = 'set';
             }
 
             let image = $(el).find('.guide-image-wrapper').find('img').attr('src');
@@ -108,7 +111,7 @@ async function getItemData() {
                 }
             });
 
-            await createItem(title, item_type, stats, '', quality, image_name);
+            await createItem(title, item_type, stats, rarity, quality, image_name);
         });
     }
   
