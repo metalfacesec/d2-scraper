@@ -53,8 +53,6 @@ function download(uri, filename) {
             if (err) {
                 return reject(err);
             }
-            console.log('content-type:', res.headers['content-type']);
-            console.log('content-length:', res.headers['content-length']);
         
             request(uri).pipe(fs.createWriteStream(filename)).on('close', resolve);
         });
@@ -91,7 +89,11 @@ async function getItemData() {
 
             let image = $(el).find('.guide-image-wrapper').find('img').attr('src');
             let image_name = image.split('/')[image.split('/').length - 1];
-            await download(image, `images/${image_name}`);
+
+            if (!fs.existsSync(`images/${image_name}`)) {
+                await download(image, `images/${image_name}`);
+            }
+            
             
             
             let info = $(el).find('.info-wrapper').find('div');
@@ -108,7 +110,7 @@ async function getItemData() {
                 }
             });
 
-            await createItem(title, item_type, stats, '', quality, '');
+            await createItem(title, item_type, stats, '', quality, image_name);
         });
     }
   
